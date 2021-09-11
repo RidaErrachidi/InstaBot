@@ -7,9 +7,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-
-username = 'rida_e_'
-password = 'Akram2003'
+## Enter username and password here and then run the script to display accounts you are following that dont follow you back"
+username = 'enter username'
+password = 'enter password'
 count = 0
 def login(driver):
      ## Replace with web driver wait
