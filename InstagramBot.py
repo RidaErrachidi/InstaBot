@@ -10,9 +10,7 @@ import time
 
 username = 'rida_e_'
 password = 'Akram2003'
-
 count = 0
-driver
 def login(driver):
      ## Replace with web driver wait
      driver.find_element_by_name("username").send_keys(username)
@@ -22,83 +20,101 @@ def click_button_with_css(driver, css_selector):
      element = WebDriverWait(driver, 20).until(
           EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
      )
+     element.click()
 def Find_Followers(driver):
      Scrolling_css = '[alt*="' + username + '"]'
      Profile_css = "[href*=\"" + username + "\"]"
      click_button_with_css(driver, Scrolling_css)
      click_button_with_css(driver, Profile_css)
-
 def __main__():
      driver = webdriver.Chrome(ChromeDriverManager().install())
      driver.get('https://www.instagram.com/accounts/login/')
      time.sleep(1)
      login(driver)
      Find_Followers(driver)
-     time.sleep(10000)
+     time.sleep(1)
 
-     Followers_css = "[href*=\"" + username + "/follwoers/\"]"
+     followers_css = "[href*=\"/" + username + "/followers/\"]"
      css_select_close = '[aria-label="Close"]'
      following_css = "[href*=\"" + username + "/following/\"]"
-     click_button_with_css((By.XPATH, "//button[contain(text(), 'Not Now')]"))
-
-     click_button_with_css[driver, Followers_css]
+     click_button_with_css(driver, followers_css)
      followers_list = Get_Usernames(driver)
 
      click_button_with_css(driver, css_select_close)
-     time.sleep(1)
+     time.sleep(2)
 
      click_button_with_css(driver, following_css)
      following_list = Get_Usernames(driver)
 
+     no_followbacks = no_follow_back(followers_list, following_list)
+     print(" You follow the following people who do not follow you back: ")
+     print(no_followbacks)
+     time.sleep(200)
+
 
      return
 
-def Check_Difference_In_Count(driver):
-     global count
-     new_count = len(driver.find_elements_by_xpath("//div[@role='dialog']//li"))
+def check_difference_in_count(driver):
+    global count
 
-     if count != new_count:
-          count = new_count
-          return True
-     else:
-          return False
+    new_count = len(driver.find_elements_by_xpath("//div[@role='dialog']//li"))
+
+    if count != new_count:
+        count = new_count
+        return True
+    else:
+        return False
+
+def no_follow_back(followers, following):
+     followers.sort()
+     following.sort()
+     no_followback_list = []
+     for i in range(len(following)):
+          try:
+               followers.index(following[i])
+          except ValueError:
+               no_followback_list += [following[i]]
+     return no_followback_list
+     
+
 
 
 def Get_Usernames(driver):
-     list_xpath = "//div[@role='dialog']//li"
-     WebDriverWait(driver, 20).until(
-          EC.presence_of_element_located((By.XPATH, list_xpath))
+    list_xpath ="//div[@role='dialog']//li"
+    WebDriverWait(driver, 20).until(
+    EC.presence_of_element_located((By.XPATH, list_xpath)))
 
-     )
-     #scroll_down()
+    scroll_down(driver)
 
-     list_elems = driver.find_elements_by_xpath(list_xpath)
-     time.sleep(10000)
-     users = []
-     for i in range(len(list_elems)):
-          try:
-               row_text = list_elems[i].text
-               if "Follow" in row_text:
-                    username = row_text[:row_text.index("\n")]
-                    users += [username]
-          except:
-               print("continue")
-     return users
+    list_elems = driver.find_elements_by_xpath(list_xpath)
+    users = []
+
+    for i in range(len(list_elems)):
+        try:
+            row_text = list_elems[i].text
+            if ("Follow" in row_text):
+                username = row_text[:row_text.index("\n")]
+                users += [username]
+        except:
+            print("continue")
+    return users
+
 
      
-def Scroll_Down():
-     global count
-     iter = 0
-     while 1:
-          scroll_top_num = str(iter * 1000)
-          iter += 1
-          driver.execute_script("document.querySelector('div[role=dialog] ul').parentNode.scrollTop= "+ scroll_top_num)
-
-          try:
-               WebDriverWait(driver, 1).until(Check_Difference_In_Count)
-          except:
-               count = 0
-               break
+def scroll_down(driver):
+    global count
+    iter = 1
+    while 1:
+        scroll_top_num = str(iter * 1000)
+        iter += 1
+        # scroll down
+        driver.execute_script("document.querySelector('div[role=dialog] ul').parentNode.scrollTop=" + scroll_top_num)
+        try:
+            WebDriverWait(driver, 1).until(check_difference_in_count)
+        except:
+            count = 0
+            break
+     
 
 
 __main__()
